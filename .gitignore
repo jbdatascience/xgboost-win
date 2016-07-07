@@ -1,0 +1,3 @@
+*.py[cod]
+svn/**
+xgboost/*.py[cod]
