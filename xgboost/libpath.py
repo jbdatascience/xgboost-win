@@ -1,6 +1,6 @@
 # coding: utf-8
 """Find the path to xgboost dynamic library files."""
-
+import imp
 import os
 import platform
 
@@ -18,10 +18,13 @@ def find_lib_path():
     lib_path: list(string)
        List of all found library path to xgboost
     """
-    curr_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
+    res = imp.find_module("numpy")
+    curr_path = os.path.join(os.path.dirname(res[1]), 'xgboost')
+    curr_file_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
     # make pythonpack hack: copy this directory one level upper for setup.py
-    dll_path = [curr_path, os.path.join(curr_path, '../../lib/'),
+    dll_path = [curr_path, curr_file_path, os.path.join(curr_path, '../../lib/'),
                 os.path.join(curr_path, './lib/')]
+
     if os.name == 'nt':
         if platform.architecture()[0] == '64bit':
             dll_path.append(os.path.join(curr_path, '../../windows/x64/Release/'))
@@ -31,10 +34,12 @@ def find_lib_path():
             dll_path.append(os.path.join(curr_path, '../../windows/Release/'))
             # hack for pip installation when copy all parent source directory here
             dll_path.append(os.path.join(curr_path, './windows/Release/'))
+
     if os.name == 'nt':
         dll_path = [os.path.join(p, 'libxgboost.dll') for p in dll_path]
     else:
         dll_path = [os.path.join(p, 'libxgboost.so') for p in dll_path]
+
     lib_path = [p for p in dll_path if os.path.exists(p) and os.path.isfile(p)]
 
     # From github issues, most of installation errors come from machines w/o compilers

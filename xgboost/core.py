@@ -103,7 +103,17 @@ def _load_lib():
     lib_path = find_lib_path()
     if len(lib_path) == 0:
         return None
-    lib = ctypes.cdll.LoadLibrary(lib_path[0])
+    found_lib = False
+    i = 0
+    while not found_lib:
+        try:
+            lib = ctypes.cdll.LoadLibrary(lib_path[i])
+            if lib:
+                found_lib = True
+        except WindowsError as err:
+            i += 1
+            if i == len(lib_path):
+                raise err
     lib.XGBGetLastError.restype = ctypes.c_char_p
     return lib
 
